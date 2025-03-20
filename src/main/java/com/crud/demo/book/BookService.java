@@ -1,15 +1,10 @@
 package com.crud.demo.book;
 
-import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.awt.print.Pageable;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -21,6 +16,8 @@ public class BookService {
     public List<BookModel> findAll(){
         return  bookRepository.findAll();
     }
+
+    public Optional<BookModel> findById(Long id) { return bookRepository.findById(id); }
 
     public BookModel criarLivro(BookModel bookModel){
         return bookRepository.save(bookModel);
