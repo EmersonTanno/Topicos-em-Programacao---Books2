@@ -1,5 +1,7 @@
 package com.crud.demo.book;
 
+import com.crud.demo.book.dto.BookRequestDTO;
+import com.crud.demo.book.dto.BookResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,8 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping
-    public ResponseEntity<List<BookModel>> listarLivros() {
-        List<BookModel> list = bookService.findAll();
+    public ResponseEntity<List<BookResponseDTO>> listarLivros() {
+        List<BookResponseDTO> list = bookService.findAll();
         if (list.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -26,17 +28,12 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criarLivro(@RequestBody BookModel bookModel) {
-        if (bookModel == null || bookModel.getId() != null) {
-            return ResponseEntity.badRequest().body("Livro inválido ou ID não deve ser informado na criação.");
+    public ResponseEntity<?> criarLivro(@RequestBody BookRequestDTO bookDTO) {
+        if (bookDTO.getNome() == null || bookDTO.getCategoria() == null) {
+            return ResponseEntity.badRequest().body("Nome ou Categoria do Livro inválido ou não informado.");
         }
-        if(bookModel.getNome() == null || bookModel.getCategoria() == null){
-            return ResponseEntity.badRequest().body("Nome ou Categoria do Livro inválido ou  não informado na criação.");
-        }
-        BookModel response = bookService.criarLivro(bookModel);
-        if (response == null) {
-            return ResponseEntity.internalServerError().body("Erro ao criar o livro.");
-        }
+
+        BookResponseDTO response = bookService.criarLivro(bookDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(response.getId()).toUri();
         return ResponseEntity.created(uri).body(response);
@@ -44,7 +41,7 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarLivro(@PathVariable Long id) {
-        Optional<BookModel> livroExistente = bookService.findById(id);
+        Optional<BookResponseDTO> livroExistente = bookService.findById(id);
         if (livroExistente.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -53,18 +50,13 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody BookModel bookModel) {
-        Optional<BookModel> livroExistente = bookService.findById(id);
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody BookRequestDTO bookDTO) {
+        Optional<BookResponseDTO> livroExistente = bookService.findById(id);
         if (livroExistente.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if(bookModel.getNome() == null){
-            bookModel.setNome(livroExistente.get().getNome());
-        }
-        if(bookModel.getCategoria() == null){
-            bookModel.setCategoria(livroExistente.get().getCategoria());
-        }
-        BookModel response = bookService.update(id, bookModel);
+
+        BookResponseDTO response = bookService.update(id, bookDTO);
         return ResponseEntity.ok(response);
     }
 }
